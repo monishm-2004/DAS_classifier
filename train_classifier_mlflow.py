@@ -141,16 +141,26 @@ def train_svm(X_train, y_train, X_test, y_test, model_name='SVM'):
         
         model = SVC(kernel='rbf', C=100, gamma='scale', probability=True, random_state=42)
         model.fit(X_train, y_train)
-    
-    y_pred = model.predict(X_test)
-    y_pred_proba = model.predict_proba(X_test)
-    
-    acc = accuracy_score(y_test, y_pred)
-    print(f"Accuracy: {acc:.4f}")
-    print(f"\nClassification Report:")
-    print(classification_report(y_test, y_pred, target_names=['BG', 'DIG', 'KNOCK', 'WATER', 'SHAKE', 'WALK']))
-    
-    return model, y_pred, y_pred_proba, acc
+        
+        y_pred = model.predict(X_test)
+        y_pred_proba = model.predict_proba(X_test)
+        
+        acc = accuracy_score(y_test, y_pred)
+        prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+        rec = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+        f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+        
+        # Log metrics
+        mlflow.log_metric("accuracy", acc)
+        mlflow.log_metric("precision", prec)
+        mlflow.log_metric("recall", rec)
+        mlflow.log_metric("f1_score", f1)
+        
+        print(f"Accuracy: {acc:.4f}")
+        print(f"\nClassification Report:")
+        print(classification_report(y_test, y_pred, target_names=['BG', 'DIG', 'KNOCK', 'WATER', 'SHAKE', 'WALK']))
+        
+        return model, y_pred, y_pred_proba, acc
 
 def train_logistic_regression(X_train, y_train, X_test, y_test, model_name='Logistic Regression'):
     """Train Logistic Regression classifier"""
@@ -318,10 +328,9 @@ def main():
         comparison_df.to_csv(output_dir / 'model_comparison.csv', index=False)
         print("\n✓ Comparison saved to: model_comparison.csv")
         
-        # Log comparison metrics
+        # Log comparison metrics to MLflow
         for _, row in comparison_df.iterrows():
             model_name = row['Model']
-            # Replace spaces with underscores for MLflow parameter names
             model_key = model_name.lower().replace(' ', '_')
             mlflow.log_param(f"{model_key}_accuracy", round(row['Accuracy'], 4))
             mlflow.log_param(f"{model_key}_precision", round(row['Precision'], 4))
