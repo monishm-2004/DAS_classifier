@@ -1,4 +1,4 @@
-# Activity Classification Project
+# DAS Activity Classification Project
 The project involves working on an open DAS(Distributed Acoustic Sensing) dataset. This dataset contains six types of Phi-OTDR events, including background noises, digging, knocking, shaking, watering and walking, in total of 15,419 samples.The dataset is split 80-20 between training and testing sets.
 By extracting 64 features from the dataset , we trained various machine learning models such as Random Forest , SVM etc.
 We also trained the a CNN that can acheive an accuracy of upto 95.73%.
